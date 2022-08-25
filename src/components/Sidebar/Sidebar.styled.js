@@ -1,8 +1,8 @@
 import styled, { css } from "styled-components";
 
 const SidebarContainer = styled.aside`
-  max-width: 250px;
-  min-width: 200px;
+  max-width: 300px;
+  min-width: 250px;
   /* background-color: hsl(240, 10%, 25%); */
   background: #283144;
   min-height: 100vh;
@@ -10,9 +10,9 @@ const SidebarContainer = styled.aside`
   padding-right: 20px;
   transition: all 0.3s ease-out;
   position: relative;
-  @media (min-width: 450px) {
-    max-width: 300px;
-    min-width: 250px;
+  @media (max-width: 550px) {
+    max-width: 250px;
+    min-width: 200px;
   }
   &::before {
     position: absolute;

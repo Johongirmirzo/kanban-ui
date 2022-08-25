@@ -75,6 +75,7 @@ const Sidebar = ({
 
   const toggleSidebar = () => setIsSidebarToggled(!isSidebarToggled);
 
+  console.log(isSidebarToggled, "Sidebar");
   return (
     <SidebarContainer
       isLightMode={isDarkMode ? false : true}
