@@ -1,4 +1,6 @@
 import styled, { css } from "styled-components";
+import { Field } from "formik";
+
 const AddTaskForm = styled.form`
   ${(props) =>
     props.isLightMode &&
@@ -47,6 +49,7 @@ const AddTaskInput = styled.input`
     padding-left: 15px;
   }
 `;
+
 const AddTaskDescription = styled.textarea`
   display: block;
   width: 100%;
@@ -67,14 +70,35 @@ const AddTaskDescription = styled.textarea`
     padding-left: 15px;
   }
 `;
+
 const AddSubtaskTitle = styled.p`
   margin-bottom: 15px;
 `;
 const AddSubtaskBox = styled.div`
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 15px;
+`;
+const AddSubtaskInput = styled(Field)`
+  display: block;
+  width: 100%;
+  flex: 1;
+  padding: 10px 8px;
+  border: 1px solid #546990;
+  background: transparent;
+  outline: 0;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  color: #a1b0cb;
+  transition: padding 0.25s ease-out;
+  &::placeholder {
+    color: #a1b0cb;
+  }
+  &:focus {
+    padding-left: 15px;
+  }
 `;
 const AddSubtaskClose = styled.div`
   font-weight: bold;
@@ -123,6 +147,13 @@ const AddTaskBtn = styled.button`
   background: hsl(247, 84%, 66%);
   margin: 20px 0;
 `;
+const AddTaskFieldError = styled.p`
+  color: hsl(0, 88%, 50%);
+  font-size: 0.9rem;
+  margin-top: 2px;
+  font-weight: 600;
+`;
+const AddSubTaskFieldError = styled(AddTaskFieldError)``;
 
 export {
   AddTaskForm,
@@ -136,4 +167,7 @@ export {
   AddSubTaskBtn,
   AddTaskStatus,
   AddTaskBtn,
+  AddSubtaskInput,
+  AddTaskFieldError,
+  AddSubTaskFieldError,
 };

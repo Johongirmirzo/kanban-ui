@@ -20,8 +20,13 @@ import {
   AddSubTaskBtn,
   AddTaskStatus,
   AddTaskBtn,
+  AddSubtaskInput,
+  AddTaskFieldError,
+  AddSubTaskFieldError,
 } from "./AddTaskModal.styled";
 import useActiveTheme from "../../hooks/useActiveTheme";
+import { Formik, FieldArray, getIn, Field } from "formik";
+import { formTaskSchema } from "../../schemas/formTaskSchema";
 
 const AddTaskModal = ({
   isAddTaskModalOpen,
@@ -29,31 +34,10 @@ const AddTaskModal = ({
   activeBoard,
   addTaskToActiveBoard,
 }) => {
-  const [taskInput, setTaskInput] = useState({
-    title: "",
-    description: "",
-    status: "Todo",
-  });
-  const [subtasks, setSubtasks] = useState([
-    { id: uuidv4(), subtask: "", completed: false },
-  ]);
   const { isDarkMode } = useContext(ThemeContext);
   const theme = useActiveTheme(isDarkMode);
 
-  useEffect(() => {
-    setTaskInput({ title: "", description: "", status: "" });
-    setSubtasks([{ id: uuidv4(), subtask: "", completed: false }]);
-  }, [activeBoard]);
-
   const [createTask] = useMutation(CREATE_TASK, {
-    variables: {
-      input: {
-        ...taskInput,
-        subtasks,
-        status: taskInput.status ? taskInput.status : "Todo",
-      },
-      boardId: activeBoard.id,
-    },
     onCompleted(data) {
       addTaskToActiveBoard(data.createTask);
       toggleAddTaskModal();
@@ -78,34 +62,6 @@ const AddTaskModal = ({
     },
   });
 
-  const handleChange = (e) =>
-    setTaskInput({ ...taskInput, [e.target.name]: e.target.value });
-
-  const addSubtask = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setSubtasks([...subtasks, { id: uuidv4(), subtask: "", completed: false }]);
-  };
-  const closeSubtask = (id, e) => {
-    e.stopPropagation();
-    setSubtasks(subtasks.filter((subtask) => subtask.id !== id));
-  };
-
-  const updateSubtask = (id, e) => {
-    setSubtasks(
-      subtasks.map((subtask) =>
-        subtask.id === id ? { ...subtask, subtask: e.target.value } : subtask
-      )
-    );
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(taskInput);
-    createTask();
-  };
-
   return (
     <div style={{ minHeight: "100vh" }}>
       <Modal
@@ -119,71 +75,129 @@ const AddTaskModal = ({
           <Typography id="modal-modal-title" variant="h6" component="h2" mb={2}>
             Add New Task
           </Typography>
-          <AddTaskForm
-            onSubmit={handleSubmit}
-            isLightMode={isDarkMode ? false : true}
+          <Formik
+            initialValues={{
+              title: "",
+              description: "",
+              status: "Todo",
+              subtasks: [{ id: uuidv4(), subtask: "", completed: false }],
+            }}
+            validationSchema={formTaskSchema}
+            onSubmit={(values) => {
+              createTask({
+                variables: {
+                  input: values,
+                  boardId: activeBoard.id,
+                },
+              });
+
+              console.log(values, "Adding Task");
+            }}
           >
-            <AddTaskFormControl>
-              <AddTaskLabel htmlFor="title">Title</AddTaskLabel>
-              <AddTaskInput
-                type="text"
-                id="title"
-                name="title"
-                value={taskInput.title}
-                onChange={handleChange}
-                placeholder="Add Task"
-                required
-              />
-            </AddTaskFormControl>
-            <AddTaskFormControl>
-              <AddTaskLabel htmlFor="description">Description</AddTaskLabel>
-              <AddTaskDescription
-                id="description"
-                name="description"
-                value={taskInput.description}
-                onChange={handleChange}
-                placeholder="Add Task"
-              ></AddTaskDescription>
-            </AddTaskFormControl>
-            <AddTaskFormControl>
-              <AddSubtaskTitle>Subtasks</AddSubtaskTitle>
-              {subtasks?.map((subtask) => (
-                <AddSubtaskBox key={subtask.id}>
+            {(props) => (
+              <AddTaskForm
+                onSubmit={props.handleSubmit}
+                isLightMode={isDarkMode ? false : true}
+              >
+                <AddTaskFormControl>
+                  <AddTaskLabel htmlFor="title">Title</AddTaskLabel>
                   <AddTaskInput
                     type="text"
                     id="title"
                     name="title"
-                    value={subtask.subtask}
-                    onChange={updateSubtask.bind(null, subtask.id)}
-                    placeholder="Add Subtask"
+                    value={props.values.title}
+                    onChange={props.handleChange}
+                    placeholder="Add Task"
                   />
-                  <AddSubtaskClose
-                    onClick={closeSubtask.bind(null, subtask.id)}
+                  {props.errors.title && props.touched.title ? (
+                    <AddTaskFieldError>{props.errors.title}</AddTaskFieldError>
+                  ) : null}
+                </AddTaskFormControl>
+                <AddTaskFormControl>
+                  <AddTaskLabel htmlFor="description">Description</AddTaskLabel>
+                  <AddTaskDescription
+                    id="description"
+                    name="description"
+                    value={props.values.description}
+                    onChange={props.handleChange}
+                    placeholder="Add Task"
+                  ></AddTaskDescription>
+                  {props.errors.description && props.touched.description ? (
+                    <AddTaskFieldError>
+                      {props.errors.description}
+                    </AddTaskFieldError>
+                  ) : null}
+                </AddTaskFormControl>
+                <AddTaskFormControl>
+                  <AddSubtaskTitle>Subtasks</AddSubtaskTitle>
+                  <FieldArray name="subtasks">
+                    {({ push, remove }) => (
+                      <div>
+                        {props.values.subtasks.map((subtask, index) => (
+                          <AddSubtaskBox key={subtask.id}>
+                            <Field name={`subtasks.${index}.subtask`}>
+                              {({ field, meta, form: { touched, errors } }) => (
+                                <>
+                                  <div style={{ flex: "1" }}>
+                                    <AddSubtaskInput
+                                      type="text"
+                                      placeholder="Add Subtask"
+                                      {...field}
+                                    />
+                                    {meta.error && meta.touched && (
+                                      <AddSubTaskFieldError>
+                                        {meta.error}
+                                      </AddSubTaskFieldError>
+                                    )}
+                                  </div>
+                                  <AddSubtaskClose
+                                    onClick={() => remove(index)}
+                                  >
+                                    <DeleteForeverIcon
+                                      sx={{ color: "hsl(3, 84%, 44%)" }}
+                                    />
+                                  </AddSubtaskClose>
+                                </>
+                              )}
+                            </Field>
+                          </AddSubtaskBox>
+                        ))}
+
+                        <AddSubTaskBtn
+                          type="button"
+                          onClick={() =>
+                            push({
+                              id: uuidv4(),
+                              subtask: "",
+                              completed: false,
+                            })
+                          }
+                          className="add-task-btn"
+                        >
+                          + Add New Subtask
+                        </AddSubTaskBtn>
+                      </div>
+                    )}
+                  </FieldArray>
+                </AddTaskFormControl>
+                <AddTaskFormControl>
+                  <AddTaskLabel htmlFor="status">Status</AddTaskLabel>
+                  <AddTaskStatus
+                    isLightMode={isDarkMode ? false : true}
+                    id="status"
+                    name="status"
+                    value={props.values.status}
+                    onChange={props.handleChange}
                   >
-                    <DeleteForeverIcon sx={{ color: "hsl(3, 84%, 44%)" }} />
-                  </AddSubtaskClose>
-                </AddSubtaskBox>
-              ))}
-              <AddSubTaskBtn onClick={addSubtask} className="add-task-btn">
-                + Add New Subtask
-              </AddSubTaskBtn>
-            </AddTaskFormControl>
-            <AddTaskFormControl>
-              <AddTaskLabel htmlFor="status">Status</AddTaskLabel>
-              <AddTaskStatus
-                isLightMode={isDarkMode ? false : true}
-                id="status"
-                name="status"
-                value={taskInput.status}
-                onChange={handleChange}
-              >
-                <option value="Todo">Todo</option>
-                <option value="Doing">Doing</option>
-                <option value="Done">Done</option>
-              </AddTaskStatus>
-            </AddTaskFormControl>
-            <AddTaskBtn type="submit">Create Task</AddTaskBtn>
-          </AddTaskForm>
+                    <option value="Todo">Todo</option>
+                    <option value="Doing">Doing</option>
+                    <option value="Done">Done</option>
+                  </AddTaskStatus>
+                </AddTaskFormControl>
+                <AddTaskBtn type="submit">Create Task</AddTaskBtn>
+              </AddTaskForm>
+            )}
+          </Formik>
         </Box>
       </Modal>
     </div>

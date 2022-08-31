@@ -16,6 +16,8 @@ export const LOGIN_USER = gql`
       id
       username
       token
+      email
+      password
     }
   }
 `;

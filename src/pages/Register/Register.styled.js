@@ -71,6 +71,13 @@ const RegisterRoutetext = styled.div`
   color: #a1b0cb;
 `;
 
+const RegisterFieldError = styled.p`
+  color: hsl(0, 88%, 50%);
+  font-size: 0.9rem;
+  margin-top: 2px;
+  font-weight: 600;
+`;
+
 export {
   RegisterBox,
   RegisterFormBox,
@@ -83,4 +90,5 @@ export {
   RegisterInput,
   RegisterButton,
   RegisterRoutetext,
+  RegisterFieldError,
 };

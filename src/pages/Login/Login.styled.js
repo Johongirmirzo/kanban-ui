@@ -71,6 +71,12 @@ const LoginRoutetext = styled.div`
   color: #a1b0cb;
 `;
 
+const LoginFieldError = styled.p`
+  color: hsl(0, 88%, 50%);
+  font-size: 0.9rem;
+  margin-top: 2px;
+  font-weight: 600;
+`;
 export {
   LoginBox,
   LoginFormBox,
@@ -83,4 +89,5 @@ export {
   LoginInput,
   LoginButton,
   LoginRoutetext,
+  LoginFieldError,
 };

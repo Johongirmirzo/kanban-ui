@@ -19,7 +19,7 @@ const Login = React.lazy(() => import("./pages/Login/Login"));
 const NotFound = React.lazy(() => import("./pages/NotFound/NotFound"));
 
 const httpLink = createHttpLink({
-  uri: "https://kanban-appi.herokuapp.com/graphql",
+  uri: "https://kanban-appi.herokuapp.com",
 });
 
 const authLink = setContext((_, { headers }) => {

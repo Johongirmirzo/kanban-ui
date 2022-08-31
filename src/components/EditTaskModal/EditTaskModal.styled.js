@@ -125,6 +125,12 @@ const EditTaskBtn = styled.button`
 
   margin: 20px 0;
 `;
+const EditTaskFieldError = styled.p`
+  color: hsl(0, 88%, 50%);
+  font-size: 0.9rem;
+  margin-top: 2px;
+  font-weight: 600;
+`;
 
 export {
   EditTaskForm,
@@ -138,4 +144,5 @@ export {
   EditSubTaskBtn,
   EditTaskStatus,
   EditTaskBtn,
+  EditTaskFieldError,
 };
